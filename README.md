@@ -2,7 +2,7 @@
 
 A custom convolutional neural network trained from scratch to classify images of food dishes into 101 categories, using the [Food-101](https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/) dataset.
 
-Built as a solo project to explore CNN architecture design, training dynamics, and the engineering decisions that go into a production-ready image classifier — without relying on pretrained models or transfer learning.
+Built as a solo project to explore CNN architecture design, training dynamics, and the engineering decisions that go into a production-ready image classifier - without relying on pretrained models or transfer learning.
 
 ---
 
@@ -45,7 +45,7 @@ Output: (B, 101) logits
 
 **Two 3x3 convolutions per block instead of one 5x5**
 
-Two stacked 3x3 convolutions have an effective receptive field of 5x5, with fewer parameters (`2 * 9 * C^2` vs `25 * C^2`) and an extra non-linearity between them. This is the core insight from VGGNet — deeper is better than wider, and smaller kernels are more parameter-efficient.
+Two stacked 3x3 convolutions have an effective receptive field of 5x5, with fewer parameters (`2 * 9 * C^2` vs `25 * C^2`) and an extra non-linearity between them. This is the core insight from VGGNet - deeper is better than wider, and smaller kernels are more parameter-efficient.
 
 **BatchNorm after every Conv layer**
 
@@ -57,11 +57,11 @@ Redundant with BatchNorm. BatchNorm has its own learnable bias parameter (β), s
 
 **Global Average Pooling instead of Flatten**
 
-After the 5th Conv block, spatial size is 4x4. Using `Flatten` then `Linear` would give a head of size `512*16 = 8192`, making the first FC layer `8192*256 ≈ 2M parameters` — expensive and prone to overfitting. GAP collapses each feature map to a single number ("how much of this feature is present anywhere"), reducing the head input to 512. The head becomes `512*256 ≈ 131k parameters` — a 15x reduction.
+After the 5th Conv block, spatial size is 4x4. Using `Flatten` then `Linear` would give a head of size `512*16 = 8192`, making the first FC layer `8192*256 ≈ 2M parameters` - expensive and prone to overfitting. GAP collapses each feature map to a single number ("how much of this feature is present anywhere"), reducing the head input to 512. The head becomes `512*256 ≈ 131k parameters` - a 15x reduction.
 
 **AdamW over Adam**
 
-Standard Adam's weight decay implementation is technically incorrect — it couples L2 regularisation with the adaptive gradient scaling, causing the effective regularisation to vary per parameter. AdamW decouples them, applying weight decay directly to weights before the gradient update. For the same weight decay value, AdamW generalises better.
+Standard Adam's weight decay implementation is technically incorrect - it couples L2 regularisation with the adaptive gradient scaling, causing the effective regularisation to vary per parameter. AdamW decouples them, applying weight decay directly to weights before the gradient update. For the same weight decay value, AdamW generalises better.
 
 **Cosine Annealing LR schedule**
 
@@ -73,7 +73,7 @@ Instead of hard targets (1 for correct class, 0 for all others), label smoothing
 
 **Kaiming initialisation for Conv layers**
 
-Kaiming (He) initialisation sets initial weights to `N(0, sqrt(2/fan_in))`. The factor of 2 is specifically derived to account for ReLU zeroing half its inputs — without it, variance would shrink through each layer and signals would vanish in deep networks. Xavier initialisation (used for Linear layers here) assumes a linear activation and uses `sqrt(2/(fan_in + fan_out))`.
+Kaiming (He) initialisation sets initial weights to `N(0, sqrt(2/fan_in))`. The factor of 2 is specifically derived to account for ReLU zeroing half its inputs - without it, variance would shrink through each layer and signals would vanish in deep networks. Xavier initialisation (used for Linear layers here) assumes a linear activation and uses `sqrt(2/(fan_in + fan_out))`.
 
 ---
 
@@ -130,7 +130,7 @@ Training augmentations are chosen to simulate realistic variation in dish photog
 | ColorJitter (brightness, contrast, saturation, hue) | Simulates lighting variation |
 | RandomRotation (±15°) | Simulates slight camera tilt |
 
-Validation uses only CenterCrop + Normalise — augmentation is never applied to validation data, as it would introduce noise into the metric.
+Validation uses only CenterCrop + Normalise - augmentation is never applied to validation data, as it would introduce noise into the metric.
 
 ---
 
@@ -142,9 +142,9 @@ python src/evaluate.py --checkpoint results/checkpoints/best_model.pt
 ```
 
 Outputs:
-- `confusion_matrix.png` — the 20 most confused class pairs (full 101x101 is illegible)
-- `per_class_metrics.csv` — precision, recall, F1 per class, sorted by F1
-- `learning_curves.png` — train/val loss, top-1/top-5 accuracy, LR schedule over epochs
+- `confusion_matrix.png` - the 20 most confused class pairs (full 101x101 is illegible)
+- `per_class_metrics.csv` - precision, recall, F1 per class, sorted by F1
+- `learning_curves.png` - train/val loss, top-1/top-5 accuracy, LR schedule over epochs
 
 ---
 
@@ -190,25 +190,25 @@ const classifyDish = async (imageUri: string) => {
 ## What I learned / would do differently
 
 **Worked well:**
-- GAP made a meaningful difference — the model regularises better than a Flatten + large FC layer
+- GAP made a meaningful difference - the model regularises better than a Flatten + large FC layer
 - Label smoothing noticeably reduced training/validation accuracy gap
 - AdamW with cosine annealing converged more smoothly than Adam + step decay in early experiments
 
 **Limitations of a from-scratch CNN:**
-- Feature reuse is limited — pretrained models have seen 1.2M diverse images; Food-101 training only gives 750 per class
+- Feature reuse is limited - pretrained models have seen 1.2M diverse images; Food-101 training only gives 750 per class
 - Deeper architectures (ResNet, EfficientNet) benefit disproportionately from pretraining because residual connections allow more effective gradient flow
 
 **If I continued this project:**
-- Self-supervised pretraining (SimCLR or DINO) on unlabelled food images before fine-tuning on Food-101 — would recover most of the gap to pretrained ImageNet models without using labelled ImageNet data
+- Self-supervised pretraining (SimCLR or DINO) on unlabelled food images before fine-tuning on Food-101 - would recover most of the gap to pretrained ImageNet models without using labelled ImageNet data
 - Knowledge distillation: train a smaller student model from this network for faster mobile inference in Dishboxd
 
 ---
 
 ## References
 
-- [Food-101 Dataset](https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/) — Bossard et al., 2014
-- [Very Deep Convolutional Networks (VGGNet)](https://arxiv.org/abs/1409.1556) — Simonyan & Zisserman, 2015 — motivation for stacking 3x3 convs
-- [Batch Normalisation](https://arxiv.org/abs/1502.03167) — Ioffe & Szegedy, 2015
-- [Delving Deep into Rectifiers (Kaiming init)](https://arxiv.org/abs/1502.01852) — He et al., 2015
-- [Decoupled Weight Decay Regularisation (AdamW)](https://arxiv.org/abs/1711.05101) — Loshchilov & Hutter, 2019
-- [When Does Label Smoothing Help?](https://arxiv.org/abs/1906.02629) — Müller et al., 2019
+- [Food-101 Dataset](https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/) - Bossard et al., 2014
+- [Very Deep Convolutional Networks (VGGNet)](https://arxiv.org/abs/1409.1556) - Simonyan & Zisserman, 2015 - motivation for stacking 3x3 convs
+- [Batch Normalisation](https://arxiv.org/abs/1502.03167) - Ioffe & Szegedy, 2015
+- [Delving Deep into Rectifiers (Kaiming init)](https://arxiv.org/abs/1502.01852) - He et al., 2015
+- [Decoupled Weight Decay Regularisation (AdamW)](https://arxiv.org/abs/1711.05101) - Loshchilov & Hutter, 2019
+- [When Does Label Smoothing Help?](https://arxiv.org/abs/1906.02629) - Müller et al., 2019
