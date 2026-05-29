@@ -16,7 +16,7 @@ Built as a solo project to explore CNN architecture design, training dynamics, a
 | Model parameters | ~7.3M |
 | Training time (GPU) | ~3 hours |
 
-> **Context:** A fine-tuned ResNet50 (pretrained on ImageNet) achieves ~85% top-1 on Food-101. A CNN trained from scratch in 30 epochs is expected to land in the 50–60% range. The gap reflects what transfer learning buys you — not a flaw in the architecture.
+> **Context:** A fine-tuned ResNet50 (pretrained on ImageNet) achieves ~85% top-1 on Food-101. A CNN trained from scratch in 30 epochs is expected to land in the 50–60% range. The gap reflects what transfer learning buys you- not a flaw in the architecture.
 
 ---
 
